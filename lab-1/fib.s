@@ -11,44 +11,40 @@
 fibonacci:
 	@ ADD/MODIFY CODE BELOW
 	@ PROLOG
-	push {r3, r4, r5, lr}
+	push {R3, R4, R5, R6, lr}
 
-	@ R4 = R0 - 0 (update flags)
-        SUBS R4, R0, #0
-	@ if(R0 <= 0) goto .L3 (which returns 0)
-        BLE .L3
+        @ R0 <= 0
+        CMP R0, #0
+        ITT LE
+        MOVLE R0, #0
+        BLE return
 
-	@ Compare R4 wtih 1
-        CMP R4, #1
-	@ If R4 == 1 goto .L4 (which returns 1)
-        BEQ .L4
+        @ R0 == 1
+        CMP R0, #1
+        IT EQ
+        BEQ return
 
-	@ R0 = R4 - 1
-        SUB R0, R4, #1
-	@ Recursive call to fibonacci with R4 - 1 as parameter
-        BL fibonacci
+        @ R0 > 1
+        MOV R3, #0
+        MOV R4, #1
+        MOV R5, #0
 
+        MOV R6, #1
 
-	@ R5 = R0
-        MOV R5, R0
-	@ R0 = R4 - 2
-        SUB R0, R4, #2
-	@ Recursive call to fibonacci with R4 - 2 as parameter
-        BL fibonacci
+        @ for (i = 2; i <= n; ++i)
+loop:
+        ADD R6, #1
+        CMP R6, R0
+        ITTT LE
+        ADDLE R5, R3, R4
+        MOVLE R3, R4
+        MOVLE R4, R5
+        BLE loop
 
-	@ R0 = R5 + R0 (update flags)
-        ADD R0, R5
-
-	pop {r3, r4, r5, pc}		@EPILOG
-
+        MOV R0, R5
+return:
+	pop {r3, r4, r5, r6, pc}		@EPILOG
 	@ END CODE MODIFICATION
-.L3:
-	mov r0, #0			@ R0 = 0
-	pop {r3, r4, r5, pc}		@ EPILOG
-
-.L4:
-	mov r0, #1			@ R0 = 1
-	pop {r3, r4, r5, pc}		@ EPILOG
 
 	.size fibonacci, .-fibonacci
 	.end
